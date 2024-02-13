@@ -1,16 +1,13 @@
-import unicodedata, idna, requests
+import unicodedata, idna, re, requests
 
 
 VALID_TLDS_LIST = requests.get('http://data.iana.org/TLD/tlds-alpha-by-domain.txt').text.split()[11::]
 
-def encode_email(email: str) -> str|None:
-    """
-    Encode the given email to IDNA stuff, if its wrong it will return None.
-    """
+def encode_email(email: str):
     if email.count('@') != 1 or email.count('.') < 1:
         return None
 
-    lowercased = email.lower()  # Convert to lowercase
+    lowercased = email.lower() 
     normalized = unicodedata.normalize('NFC', lowercased)
 
     local, domain = normalized.split('@')
@@ -26,7 +23,7 @@ def encode_email(email: str) -> str|None:
         print(f'Error encoding email: {e}')
         return None
     
-    # check if tld in valid tlds list
+   
     tld = domain_encoded.split('.')[-1]
     if tld.upper() not in VALID_TLDS_LIST:
         print(f'Invalid TLD: {tld}')
@@ -35,8 +32,19 @@ def encode_email(email: str) -> str|None:
     return f'{local_encoded}@{domain_encoded}'
 
 
-def encode_url(url: str) -> str|None:
-    """
-    Encode the given url to IDNA stuff.
-    """
+def encode_domain_from_url(url: str):
+    domain_match = re.match(r'https?://([^/]+)', url)
+    if not domain_match:
+        return None
+    
+    domain = domain_match.group(1)
 
+    normalized_domain = unicodedata.normalize('NFC', domain)
+
+    try:
+        encoded_domain = idna.encode(normalized_domain).decode('ascii')
+    except Exception as e:
+        print(f'Error encoding domain: {e}')
+        return None
+
+    return encoded_domain
