@@ -57,6 +57,7 @@ smtp_port = 587
 
 # Create an SMTP session
 with smtplib.SMTP(smtp_server, smtp_port) as server:
+    server.command_encoding = 'utf-8'
     # Start the TLS connection (for secure communication)
     # server.starttls()
 
