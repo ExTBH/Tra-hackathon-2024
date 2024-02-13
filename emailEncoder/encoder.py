@@ -33,11 +33,13 @@ def encode_email(email: str):
 
 
 def encode_domain_from_url(url: str):
-    domain_match = re.match(r'https?://([^/]+)', url)
+    domain_match = re.match(r'(https?://)([^/]+)(/.*)?', url)
     if not domain_match:
         return None
     
-    domain = domain_match.group(1)
+    protocol = domain_match.group(1)
+    domain = domain_match.group(2)
+    path = domain_match.group(3)
 
     normalized_domain = unicodedata.normalize('NFC', domain)
 
@@ -47,4 +49,8 @@ def encode_domain_from_url(url: str):
         print(f'Error encoding domain: {e}')
         return None
 
-    return encoded_domain
+    encoded_url = f"{protocol}{encoded_domain}{path}" if path else f"{protocol}{encoded_domain}"
+    return encoded_url
+
+
+print(encode_domain_from_url('https://مثال.موقع/مسار'))
